@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAHIDJS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 1,5em;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-section {
+            display: none;
+        }
+
+        .game-section.active {
+            display: block;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-btn.selected {
+            background: #e74c3c;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+
+        .btn-restart {
+            background: #9b59b6;
+        }
+
+        .btn-restart:hover {
+            background: #8e44ad;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .result h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f39c12;
+            border-radius: 50px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .progress {
+            background: #ecf0f1;
+            height: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #e74c3c;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .emoji {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2em;
+            }
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕HAII ISNAA💕</h1>
+        <p class="subtitle">KERJAKAN BEBERAPA SOAL BERIKUT!</p>
+
+        <!-- Start Screen -->
+        <div class="game-section active" id="startScreen">
+            <div class="emoji">😍</div>
+            <p style="font-size: 1.1em; color: #2c3e50; margin-bottom: 30px;">
+                Seberapa "TERHIBUR" ISNA? Dengan web yang ku buat ini Jawab pertanyaan dengan jujur dan temukan levelmu!
+            </p>
+            <button class="btn" onclick="startGame()">Mulai Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-section" id="gameScreen">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p style="color: #7f8c8d; margin-bottom: 20px;">
+                Pertanyaan <span id="currentQuestion">1</span> dari <span id="totalQuestions">10</span>
+            </p>
+            <div class="question" id="questionText"></div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="btn-group">
+                <button class="btn" onclick="nextQuestion()">Lanjut</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="game-section" id="resultScreen">
+            <div class="emoji" id="resultEmoji"></div>
+            <div class="result">
+                <h2 id="resultTitle"></h2>
+                <div class="score-display" id="scoreDisplay"></div>
+                <div class="level-badge" id="levelBadge"></div>
+                <p id="resultDescription" style="margin-top: 20px; font-size: 1.1em;"></p>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-restart" onclick="restartGame()">Main Lagi</button>
+                <button class="btn" onclick="shareResult()">Bagikan Hasil</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Saat aku tidak reply chat, apa yang kamu lakukan?",
+                options: [
+                    { text: "Tenang, mungkin dia sedang sibuk", points: 1 },
+                    { text: "Menunggu dengan cemas, terus cek HP", points: 3 },
+                    { text: "Langsung chat lagi berapa kali", points: 5 }
+                ]
+            },
+            {
+                question: "Ketika aku bilang 'kamu sibuk enggak?', tapi kamu?",
+                options: [
+                    { text: "Mungkin dia kesepian", points: 1 },
+                    { text: "Tetap diam saja", points: 3 },
+                    { text: "Langsung berusaha untuk menemani", points: 5 }
+                ]
+            },
+            {
+                question: "Apa kamu ingin kerja atau kuliah?",
+                options: [
+                    { text: "Keduanya, kerja sambil kuliah", points: 1 },
+                    { text: "kerja saja, fokus kerja untuk membanggakan orang tua", points: 3 },
+                    { text: "kuliah, untuk sekolah ke jenjang yang lebih tinggi", points: 5 }
+                ]
+            },
+            {
+                question: "Ketika aku bilang 'keluar rumah pakai kerudung ya'respon kamu?",
+                options: [
+                    { text: "Tetap keluar tanpa kerudung", points: 1 },
+                    { text: "Kadang pakai kadang tidak", points: 3 },
+                    { text: "selalu pakai kerudung kemanapun", points: 5 }
+                ]
+            },
+            {
+                question: "Saat kamu bad mood, aku harus apa?",
+                options: [
+                    { text: "Memberikan space sampai mood kembali baik", points: 1 },
+                    { text: "Lebih baik kamu diam", points: 3 },
+                    { text: "Hibur sampai tidak bad mood", points: 5 }
+                ]
+            },
+            {
+                question: "Ketika aku bercerita soal masalah, kamu?",
+                options: [
+                    { text: "Dengar baik-baik, diskusi solusi", points: 1 },
+                    { text: "Berusaha memecahkan semua masalahnya", points: 3 },
+                    { text: "Memberikan semangat untuk melewati masalah", points: 5 }
+                ]
+            },
+            {
+                question: "Seberapa penting kehadiran ku dalam hidupmu?",
+                options: [
+                    { text: "Penting tapi tidak prioritas utama", points: 1 },
+                    { text: "Sangat penting, prioritas besar", points: 3 },
+                    { text: "Tidak penting, hidup jadi terganggu", points: 5 }
+                ]
+            },
+            {
+                question: "Ketika kamu jarang membalas pesan ku, apa yang harus aku lakukan?",
+                options: [
+                    { text: "Diam saja sampai pesan di balas", points: 1 },
+                    { text: "Terus lah mencari", points: 3 },
+                    { text: "chat beberapa kali saja agar tidak terganggu", points: 5 }
+                ]
+            },
+            {
+                question: "effort atau tidak effort?",
+                options: [
+                    { text: "Sama sama effort", points: 1 },
+                    { text: "Salah satu saja yang effort", points: 3 },
+                    { text: "tidak saling effort", points: 5 }
+                ]
+            },
+            {
+                question: "Kesimpulanmu untuk diri sendiri kedepanya?",
+                options: [
+                    { text: "Ingin lebih baik dari sebelumnya", points: 1 },
+                    { text: "Sangat ingin berubah", points: 3 },
+                    { text: "Tidak pantang menyerah", points: 5 }
+                ]
+            }
+        ];
+
+        const levels = [
+            { min: 10, max: 15, title: "TETAP SEMANGAT", emoji: "😎", badge: "COOL DUDE", desc: "Jalani hari hari mu dengan penuh semangat!" },
+            { min: 16, max: 25, title: "SEDANG SENANG", emoji: "😊", badge: "NORMAL", desc: "Kamu adalah orang, yang baik hati." },
+            { min: 26, max: 35, title: "SANGAT SENANG", emoji: "😍", badge: "SEDANG", desc: "Kamu cukup baik sama seseorang. Perhatian mu cukup tinggi!" },
+            { min: 36, max: 45, title: "SENANG SEKALI", emoji: "🥰", badge: "CUKUP BAIK", desc: "Wah! Kamu benar-benar sedang senang" },
+            { min: 46, max: 50, title: "MOOD LAGI BAIK", emoji: "😵‍💫", badge: "SANGAT BAIK", desc: "Selamat! Kamu adalah orang paling beruntung. Harap peka dengan seseorang yang menemani mu dari awal sebelum terlambat! 😂" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+        let selectedAnswers = [];
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            selectedAnswers = [];
+            showQuestion();
+        }
+
+        function showQuestion() {
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = questions.length;
+
+            const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progressPercent + '%';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option.text;
+                btn.onclick = () => selectOption(index, option.points);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(index, points) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            buttons[index].classList.add('selected');
+            
+            selectedAnswers[currentQuestionIndex] = points;
+            totalScore += points;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswers[currentQuestionIndex] === undefined) {
+                alert('Pilih jawaban dulu!');
+                return;
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+
+            const level = levels.find(l => totalScore >= l.min && totalScore <= l.max);
+
+            document.getElementById('resultEmoji').textContent = level.emoji;
+            document.getElementById('resultTitle').textContent = level.title;
+            document.getElementById('scoreDisplay').textContent = totalScore + ' / 50';
+            document.getElementById('levelBadge').textContent = level.badge;
+            document.getElementById('resultDescription').textContent = level.desc;
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').classList.remove('active');
+            document.getElementById('startScreen').classList.add('active');
+        }
+
+        function shareResult() {
+            const level = levels.find(l => totalScore >= l.min && totalScore <= l.max);
+            const text = `Aku ${level.title} dengan skor ${totalScore}/50 di Game PEKA! 💕 Coba kamu juga: `;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Game PEKA',
+                    text: text
+                });
+            } else {
+                alert(text + ' (Copy link game ini untuk berbagi)');
+            }
+        }
+    </script>
+</body>
+</html>
